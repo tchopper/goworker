@@ -1,6 +1,7 @@
 package goworker
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"sync"
@@ -37,6 +38,8 @@ type WorkerSettings struct {
 }
 
 func SetSettings(settings WorkerSettings) {
+	println("SET SETTINGS")
+	Init()
 	workerSettings = settings
 }
 
@@ -45,9 +48,11 @@ func SetSettings(settings WorkerSettings) {
 // that wish to access goworker functions and configuration
 // without actually processing jobs.
 func Init() error {
+	println("123")
 	initMutex.Lock()
 	defer initMutex.Unlock()
 	if !initialized {
+		println("INIT")
 		var err error
 		logger, err = seelog.LoggerFromWriterWithMinLevel(os.Stdout, seelog.InfoLvl)
 		if err != nil {
@@ -73,11 +78,24 @@ func Init() error {
 // while they wait for an available connection. Expect this
 // API to change drastically.
 func GetConn() (*RedisConn, error) {
+	println("GetConn()")
 	resource, err := pool.Get(ctx)
 
 	if err != nil {
 		return nil, err
 	}
+	// Performs simple connection check. Redial if needed
+	fmt.Printf("%+v\n", resource)
+	_, err = resource.(*RedisConn).Do("PING")
+
+	if err != nil {
+		resource.(*RedisConn).Close()
+		resource, err = redisConnFromURI(workerSettings.URI)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return resource.(*RedisConn), nil
 }
 
@@ -115,6 +133,8 @@ func Close() {
 // received, or until the queues are empty if the
 // -exit-on-complete flag is set.
 func Work() error {
+	println("--------------------")
+
 	err := Init()
 	if err != nil {
 		return err
