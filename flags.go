@@ -100,7 +100,6 @@ func Namespace() string {
 }
 
 func init() {
-	flags.Parse()
 	fmt.Printf("%+v\n", workerSettings)
 	flag.StringVar(&workerSettings.QueuesString, "queues", "", "a comma-separated list of Resque queues")
 
