@@ -10,7 +10,6 @@ var (
 )
 
 func init() {
-	println("init")
 	workers = make(map[string]workerFunc)
 }
 
@@ -23,7 +22,6 @@ func Register(class string, worker workerFunc) {
 }
 
 func Enqueue(job *Job) error {
-	println("------------------------------")
 	err := Init()
 	if err != nil {
 		return err

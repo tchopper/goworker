@@ -32,6 +32,7 @@ func newRedisPool(uri string, capacity int, maxCapacity int, idleTimout time.Dur
 }
 
 func redisConnFromURI(uriString string) (*RedisConn, error) {
+	println(uriString)
 	uri, err := url.Parse(uriString)
 	if err != nil {
 		return nil, err

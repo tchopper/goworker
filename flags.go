@@ -87,7 +87,6 @@ package goworker
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"strings"
 )
@@ -100,7 +99,6 @@ func Namespace() string {
 }
 
 func init() {
-	fmt.Printf("%+v\n", workerSettings)
 	flag.StringVar(&workerSettings.QueuesString, "queues", "", "a comma-separated list of Resque queues")
 
 	flag.Float64Var(&workerSettings.IntervalFloat, "interval", 5.0, "sleep interval when no jobs are found")
@@ -129,7 +127,6 @@ func init() {
 }
 
 func flags() error {
-	println("00000000000000000000000000000000")
 	if !flag.Parsed() {
 		flag.Parse()
 	}
