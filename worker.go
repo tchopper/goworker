@@ -1,6 +1,7 @@
 package goworker
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 
 type worker struct {
 	process
+	middlewares []func(WorkerFunc) WorkerFunc
 }
 
 func newWorker(id string, queues []string) (*worker, error) {
@@ -104,8 +106,8 @@ func (w *worker) work(jobs <-chan *Job, monitor *sync.WaitGroup) {
 			}
 		}()
 		for job := range jobs {
-			if workerFunc, ok := workers[job.Payload.Class]; ok {
-				w.run(job, workerFunc)
+			if WorkerFunc, ok := workers[job.Payload.Class]; ok {
+				w.run(job, WorkerFunc)
 
 				logger.Debugf("done: (Job{%s} | %s | %v)", job.Queue, job.Payload.Class, job.Payload.Args)
 			} else {
@@ -125,7 +127,7 @@ func (w *worker) work(jobs <-chan *Job, monitor *sync.WaitGroup) {
 	}()
 }
 
-func (w *worker) run(job *Job, workerFunc workerFunc) {
+func (w *worker) run(job *Job, WorkerFunc WorkerFunc) {
 	var err error
 	defer func() {
 		conn, errCon := GetConn()
@@ -151,5 +153,6 @@ func (w *worker) run(job *Job, workerFunc workerFunc) {
 		w.start(conn, job)
 		PutConn(conn)
 	}
-	err = workerFunc(job.Queue, job.Payload.Args...)
+
+	err = WorkerFunc(context.Background(), job.Queue, job.Payload.Args)
 }

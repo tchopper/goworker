@@ -1,6 +1,7 @@
 package goworker
 
 import (
+	"context"
 	"reflect"
 	"testing"
 )
@@ -62,7 +63,7 @@ func TestEnqueue(t *testing.T) {
 
 	actualArgs := []interface{}{}
 	actualQueueName := ""
-	Register(jobName, func(queue string, args ...interface{}) error {
+	Register(jobName, func(context context.Context, queue string, args []interface{}) error {
 		actualArgs = args
 		actualQueueName = queue
 		return nil

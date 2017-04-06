@@ -37,9 +37,7 @@ func (p *process) open(conn *RedisConn) error {
 	conn.Send("SADD", fmt.Sprintf("%sworkers", workerSettings.Namespace), p)
 	conn.Send("SET", fmt.Sprintf("%sstat:processed:%v", workerSettings.Namespace, p), "0")
 	conn.Send("SET", fmt.Sprintf("%sstat:failed:%v", workerSettings.Namespace, p), "0")
-	conn.Flush()
-
-	return nil
+	return conn.Flush()
 }
 
 func (p *process) close(conn *RedisConn) error {
@@ -47,32 +45,24 @@ func (p *process) close(conn *RedisConn) error {
 	conn.Send("SREM", fmt.Sprintf("%sworkers", workerSettings.Namespace), p)
 	conn.Send("DEL", fmt.Sprintf("%sstat:processed:%s", workerSettings.Namespace, p))
 	conn.Send("DEL", fmt.Sprintf("%sstat:failed:%s", workerSettings.Namespace, p))
-	conn.Flush()
-
-	return nil
+	return conn.Flush()
 }
 
 func (p *process) start(conn *RedisConn) error {
 	conn.Send("SET", fmt.Sprintf("%sworker:%s:started", workerSettings.Namespace, p), time.Now().String())
-	conn.Flush()
-
-	return nil
+	return conn.Flush()
 }
 
 func (p *process) finish(conn *RedisConn) error {
 	conn.Send("DEL", fmt.Sprintf("%sworker:%s", workerSettings.Namespace, p))
 	conn.Send("DEL", fmt.Sprintf("%sworker:%s:started", workerSettings.Namespace, p))
-	conn.Flush()
-
-	return nil
+	return conn.Flush()
 }
 
 func (p *process) fail(conn *RedisConn) error {
 	conn.Send("INCR", fmt.Sprintf("%sstat:failed", workerSettings.Namespace))
 	conn.Send("INCR", fmt.Sprintf("%sstat:failed:%s", workerSettings.Namespace, p))
-	conn.Flush()
-
-	return nil
+	return conn.Flush()
 }
 
 func (p *process) queues(strict bool) []string {

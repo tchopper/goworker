@@ -1,3 +1,5 @@
 package goworker
 
-type workerFunc func(string, ...interface{}) error
+import "context"
+
+type WorkerFunc func(context.Context, string, []interface{}) error
